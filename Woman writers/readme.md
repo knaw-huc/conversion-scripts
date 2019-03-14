@@ -1,1 +1,1 @@
-This parser is ment foor the result of a specific query. It doen't parse the complete ww database.
+This parser is meant for the result of a specific query. It doen't parse the complete ww database.
