@@ -1,1 +1,5 @@
-To be written
+In the folders you will find the various scripts for converting
+ingforms data to xdf-xml.
+In view of the advance insight, its use is not recommended.
+Scripts that give somewhat better results can be found in 'godsdienstpolitiek' and 'sport' (but these can also be improved).
+
