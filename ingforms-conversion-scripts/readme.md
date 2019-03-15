@@ -35,10 +35,10 @@ A list of the different projects with current websites, if available:
   http://resources.huygens.knaw.nl/besluitenstatengeneraal1576-1630
 - sport  
   http://resources.huygens.knaw.nl/sportbondenclubsperiodieken
-- valk  
-  http://resources.huygens.knaw.nl/verzekeringsfondsen
 - verenigingsleven  
   no website as yet.
+- verzekeringsfondsen  
+  http://resources.huygens.knaw.nl/verzekeringsfondsen
 
 
 
