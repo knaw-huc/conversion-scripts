@@ -28,12 +28,6 @@ class MyHTMLParser(HTMLParser):
     level = 1
     filename = ""
     pattern = re.compile("[^a-z]+")
-    current_tag = ""
-    current_data = ""
-    tags_without_resource = ['addressee', 'archival_section_number', 'author', 'besluit_invnr', 'decisionmaker',
-            'dossier', 'index_invnr', 'mailrapport_invnr', 'number_in_index', 'recipient', 'reference_kviv',
-            'scan', 'secret', 'section_number', 'verbaal_found', 'verbaal_invnr']
-    tags_with_resource = ['aantekeningen', 'link_scan', 'remarks', 'short_description', 'summary']
     entiteiten = []
     plaatsen = {}
     gemeenten = []
@@ -68,6 +62,9 @@ class MyHTMLParser(HTMLParser):
     relaties = {}
     relaties_met = []
     instelling = ""
+    ankernaam = ""
+    anno_tekst = ""
+    annotaties = {}
 
 
     def __init__(self,output,collection,afk):
@@ -77,13 +74,10 @@ class MyHTMLParser(HTMLParser):
         self.afk = collection
         self.number = 1
         self.locals
-#        for it in self.locals:
-#            print(it)
 
     def add_attrs(self,attrs):
         res = ""
         for attr in attrs:
-#            print(attr.__class__)
             res += ' {}="{}"'.format(attr[0],attr[1])
         return res   
 
@@ -111,7 +105,6 @@ class MyHTMLParser(HTMLParser):
 
     def plaats_start(self,attrs):
         pass
-        #self.put_out("    <s:plaats>")
 
     def plaats_end(self):
         self.data = self.data.strip()
@@ -126,7 +119,6 @@ class MyHTMLParser(HTMLParser):
 
     def gemeente_start(self,attrs):
         pass
-#        self.put_out("    <s:gemeente>")
 
     def gemeente_end(self):
         self.data = self.data.strip()
@@ -138,7 +130,6 @@ class MyHTMLParser(HTMLParser):
 
     def gemeente1984_start(self,attrs):
         pass
-#        self.put_out("    <s:gemeente1984>")
 
     def gemeente1984_end(self):
         self.data = self.data.strip()
@@ -150,7 +141,6 @@ class MyHTMLParser(HTMLParser):
 
     def provincie_start(self,attrs):
         pass
-#        self.put_out("    <s:provincie>")
 
     def provincie_end(self):
         self.data = self.data.strip()
@@ -162,11 +152,9 @@ class MyHTMLParser(HTMLParser):
 
     def provincienaam_start(self,attrs):
         pass
-#        self.put_out("    <s:provincienaam>")
 
     def provincienaam_end(self):
         pass
-#        self.put_out("</s:provincienaam>")
 
     def naam_start(self,attrs):
         pass
@@ -191,7 +179,6 @@ class MyHTMLParser(HTMLParser):
 
     def opm_naam_start(self,attrs):
         pass
-#        self.put_out("    <s:opm_naam>")
 
     def opm_naam_end(self):
         self.data = self.data.strip().replace(" & "," &amp; ")
@@ -223,7 +210,6 @@ class MyHTMLParser(HTMLParser):
 
     def begindatum_start(self,attrs):
         pass
-#        self.put_out("    <s:begindatum rdf:parseType=\"Resource\">")
 
     def begindatum_end(self):
         datum = self.get_datum()
@@ -262,7 +248,6 @@ class MyHTMLParser(HTMLParser):
 
     def kb_start(self,attrs):
         pass
-#        self.put_out("    <s:kb>")
 
     def kb_end(self):
         if not self.data.strip() == "":
@@ -271,7 +256,6 @@ class MyHTMLParser(HTMLParser):
 
     def einddatum_start(self,attrs):
         pass
-#        self.put_out("    <s:einddatum rdf:parseType=\"Resource\">")
 
     def einddatum_end(self):
         datum = self.get_datum()
@@ -283,7 +267,6 @@ class MyHTMLParser(HTMLParser):
 
     def einddatum_soort_start(self,attrs):
         pass
-#        self.put_out("    <s:einddatum_soort>")
 
     def einddatum_soort_end(self):
         if not self.data.strip() == "":
@@ -292,15 +275,12 @@ class MyHTMLParser(HTMLParser):
 
     def werkingsgebieden_start(self,attrs):
         pass
-        #self.put_out("    <s:werkingsgebieden>")
 
     def werkingsgebieden_end(self):
         pass
-        #self.put_out("  </s:werkingsgebieden>")
 
     def werkingsgebied_start(self,attrs):
         pass
-#        self.put_out("    <s:werkingsgebied>")
 
     def werkingsgebied_end(self):
         if not self.data.strip() == "":
@@ -309,18 +289,12 @@ class MyHTMLParser(HTMLParser):
             if not self.data in self.werkingsgebieden:
                 self.werkingsgebieden.append(self.data)
             self.data = ""
-#        self.put_out("</s:werkingsgebied>")
 
     def sport_start(self,attrs):
         pass
-#        self.put_out("    <s:sport>\n")
 
     def sport_end(self):
         pass
- #       if not self.data.strip() == "":
- #           self.put_out(self.data.strip())
- #           self.data = ""
- #       self.put_out("  </s:sport>\n")
 
     def soort_sport_start(self,attrs):
         self.put_out("    <s:soort_sport>")
@@ -337,16 +311,13 @@ class MyHTMLParser(HTMLParser):
         self.opm_naam = ""
         self.beginjaar = ""
         self.eindjaar = ""
-        # self.put_out("    <s:Landelijke_bond rdf:parseType=\"Resource\">")
 
     def landelijke_bond_end(self):
-        #           naam bewaren; make_id_from_words
         if self.in_landelijke_bond and not self.landelijke_bond=="":
             altname_code = "{0}_{1}".format(self.code, self.make_id_from_words(self.landelijke_bond))
             # meerdere malen zelfde landelijke bond is mogelijk!
             if altname_code in self.landelijke_bonden:
                 altname_code = self.voeg_volgnr_toe(altname_code, self.landelijke_bonden)
-#                stderr("code (l): {0}".format(altname_code))
             self.put_out("    <s:in_landelijke_bond rdf:resource=\"https://resource.huygens.knaw.nl/sport/inlandelijkebond/{0}\"/>\n".format(altname_code))
             if not altname_code in self.landelijke_bonden:
                 bond = {}
@@ -361,14 +332,8 @@ class MyHTMLParser(HTMLParser):
         self.in_landelijke_bond = False
 
 
-#        if not self.data.strip() == "":
-#            self.put_out(self.data.strip())
-#            self.data = ""
-        # self.put_out("</s:Landelijke_bond>\n")
-
     def beginjaar_start(self,attrs):
         pass
-#        self.put_out("    <s:beginjaar>")
 
     def beginjaar_end(self):
         self.data = self.data.strip()
@@ -399,7 +364,6 @@ class MyHTMLParser(HTMLParser):
         self.opm_naam = ""
         self.beginjaar = ""
         self.eindjaar = ""
-#        self.put_out("    <s:regionale_bond rdf:parseType=\"Resource\">")
 
     def regionale_bond_end(self):
         if self.in_regionale_bond and not self.regionale_bond=="":
@@ -407,7 +371,6 @@ class MyHTMLParser(HTMLParser):
             # meerdere malen zelfde regionale bond is mogelijk!
             if altname_code in self.regionale_bonden:
                 altname_code = self.voeg_volgnr_toe(altname_code, self.regionale_bonden)
-#                stderr("code (r): {0}".format(altname_code))
             self.put_out("    <s:in_regionale_bond rdf:resource=\"https://resource.huygens.knaw.nl/sport/inregionalebond/{0}\"/>\n".format(altname_code))
             if not altname_code in self.regionale_bonden:
                 bond = {}
@@ -426,7 +389,6 @@ class MyHTMLParser(HTMLParser):
 
     def dag_start(self,attrs):
         pass
-#        self.put_out("    <s:dag>")
 
     def dag_end(self):
         self.data = self.data.strip()
@@ -439,7 +401,6 @@ class MyHTMLParser(HTMLParser):
 
     def levensbeschouwing_start(self,attrs):
         pass
-#        self.put_out("    <s:levensbeschouwing>")
 
     def levensbeschouwing_end(self):
         self.data = self.data.strip()
@@ -452,7 +413,6 @@ class MyHTMLParser(HTMLParser):
 
     def nr_verenigingsdossier_start(self,attrs):
         pass
-#        self.put_out("    <s:nr_verenigingsdossier>")
 
     def nr_verenigingsdossier_end(self):
         self.data = self.data.strip()
@@ -462,24 +422,15 @@ class MyHTMLParser(HTMLParser):
 
     def relaties_start(self,attrs):
         pass
-#        self.put_out("    <s:relaties>")
 
     def relaties_end(self):
         pass
-#        self.data = self.data.strip()
-#        if not self.data.strip() == "":
-#            self.put_out(self.data.strip())
-#            self.data = ""
-#        self.put_out("  </s:relaties>\n")
 
     def relatie_start(self,attrs):
          pass
-#        self.put_out("    <s:relatie rdf:parseType=\"Resource\">")
 
     def relatie_end(self):
         if not self.in_type_relatie:
-#            self.put_out("  <s:relatie>\n")
-
             if not self.instelling=="":
                 code = "{0}_{1}".format(self.code,
                     self.make_id_from_words(self.instelling))
@@ -495,27 +446,17 @@ class MyHTMLParser(HTMLParser):
                 self.relaties_met.append(self.data)
                 self.data = ""
 
-#       if not self.data.strip() == "":
-#            self.put_out(self.data.strip())
-#            self.data = ""
-#        self.put_out("  </s:relatie>\n")
 
     def type_relatie_start(self,attrs):
         self.in_type_relatie = True
         self.relaties_met = []
         self.instelling = ""
-#        self.put_out("    <s:type_relatie>")
 
     def type_relatie_end(self):
         self.in_type_relatie = False
-#       if not self.data.strip() == "":
-#            self.put_out(self.data.strip())
-#            self.data = ""
-#        self.put_out("  </s:type_relatie>\n")
 
     def relatie_met_start(self,attrs):
         pass
-#        self.put_out("    <s:relatie_met>")
 
     def relatie_met_end(self):
         self.data = self.data.strip()
@@ -523,22 +464,18 @@ class MyHTMLParser(HTMLParser):
             self.relaties_met.append(self.data)
             self.put_out(self.data.strip())
             self.data = ""
-#        self.put_out("  </s:relatie_met>\n")
 
     def instelling_start(self,attrs):
         pass
-#        self.put_out("    <s:instelling rdf:parseType=\"Literal\">")
 
     def instelling_end(self):
         self.data = self.data.strip()
         if not self.data == "":
             self.instelling = self.data
-#            self.put_out("    <s:instelling rdf:parseType=\"Literal\">{0}</s:instelling>\n".format(self.data))
             self.data = ""
 
     def oprichters_start(self,attrs):
         pass
-#        self.put_out("    <s:oprichters rdf:parseType=\"Literal\">")
 
     def oprichters_end(self):
         self.data = self.data.strip()
@@ -548,7 +485,6 @@ class MyHTMLParser(HTMLParser):
 
     def bestuursleden_start(self,attrs):
         pass
-#        self.put_out("    <s:bestuursleden rdf:parseType=\"Literal\">")
 
     def bestuursleden_end(self):
         self.data = self.data.strip()
@@ -558,7 +494,6 @@ class MyHTMLParser(HTMLParser):
 
     def beschermheren_start(self,attrs):
         pass
-#        self.put_out("    <s:beschermheren rdf:parseType=\"Literal\">")
 
     def beschermheren_end(self):
         self.data = self.data.strip()
@@ -568,17 +503,16 @@ class MyHTMLParser(HTMLParser):
 
     def verantwoording_gegevens_start(self,attrs):
         pass
-#        self.put_out("    <s:verantwoording_gegevens rdf:parseType=\"Literal\">")
 
     def verantwoording_gegevens_end(self):
         self.data = self.data.strip()
         if not self.data == "":
-            self.put_out("    <s:verantwoording_gegevens rdf:parseType=\"Literal\">{}</s:verantwoording_gegevens>\n".format(self.data))
+            tekst = re.sub(r" *</p> *<p> *","</p>\n<p>",self.data).strip()
+            self.put_out("    <s:verantwoording_gegevens rdf:parseType=\"Literal\">{}</s:verantwoording_gegevens>\n".format(tekst))
             self.data = ""
 
     def archief_geschreven_start(self,attrs):
         pass
-#        self.put_out("    <s:archief_geschreven rdf:parseType=\"Literal\">")
 
     def archief_geschreven_end(self):
         self.data = self.data.strip()
@@ -588,7 +522,6 @@ class MyHTMLParser(HTMLParser):
 
     def archief_objecten_start(self,attrs):
         pass
-#        self.put_out("    <s:archief_objecten rdf:parseType=\"Literal\">")
 
     def archief_objecten_end(self):
         self.data = self.data.strip()
@@ -598,7 +531,6 @@ class MyHTMLParser(HTMLParser):
 
     def eigen_gebouw_start(self,attrs):
         pass
-#        self.put_out("    <s:eigen_gebouw rdf:parseType=\"Literal\">")
 
     def eigen_gebouw_end(self):
         self.data = self.data.strip()
@@ -608,7 +540,6 @@ class MyHTMLParser(HTMLParser):
 
     def vergaderplaats_start(self,attrs):
         pass
-#        self.put_out("    <s:vergaderplaats rdf:parseType=\"Literal\">")
 
     def vergaderplaats_end(self):
         self.data = self.data.strip()
@@ -618,14 +549,9 @@ class MyHTMLParser(HTMLParser):
 
     def literatuur_over_start(self,attrs):
         pass
-#        self.put_out("    <s:literatuur_over>")
 
     def literatuur_over_end(self):
         pass
-#       if not self.data.strip() == "":
-#           self.put_out(self.data.strip())
-#           self.data = ""
-#       self.put_out("</s:literatuur_over>\n")
 
     def literatuur_start(self,attrs):
         self.in_literatuur = True
@@ -635,7 +561,6 @@ class MyHTMLParser(HTMLParser):
         self.jvu = ""
         self.pages = ""
         self.ppn = ""
-        #self.put_out("    <s:literatuur rdf:parseType=\"Resource\">")
 
     def literatuur_end(self):
         self.in_literatuur = False
@@ -653,78 +578,57 @@ class MyHTMLParser(HTMLParser):
             self.literatuur_over[code] = literatuur
             self.put_out("    <s:literatuur_over rdf:resource=\"https://resource.huygens.knaw.nl/sport/literatuur_over/{}\"/>\n".format(code))
         self.data = ""
-        #self.put_out("</s:literatuur>\n")
 
     def auteur_start(self,attrs):
         pass
-#        self.put_out("    <s:auteur>")
 
     def auteur_end(self):
         self.data = self.data.strip()
         if not self.data == "":
             self.auteur = self.data
-            #self.auteur = self.data
-#            self.put_out("    <s:auteur>{}</s:auteur>\n".format(self.data))
             self.data = ""
 
     def title_start(self,attrs):
         pass
-#       self.put_out("    <s:title>")
 
     def title_end(self):
         self.data = self.data.strip()
         if not self.data == "":
             self.title= self.data
-#           self.put_out(self.data)
             self.data = ""
-#        self.put_out("</s:title>\n")
 
     def jvu_start(self,attrs):
         pass
-#       self.put_out("    <s:jvu>")
 
     def jvu_end(self):
         self.data = self.data.strip()
         if not self.data == "":
             self.jvu = self.data
-#           self.put_out(self.data)
             self.data = ""
-#        self.put_out("</s:jvu>\n")
 
     def pages_start(self,attrs):
         pass
-#       self.put_out("    <s:pages>")
 
     def pages_end(self):
         self.data = self.data.strip()
         if not self.data == "":
             self.pages = self.data
-#           self.put_out(self.data)
             self.data = ""
-#        self.put_out("</s:pages>\n")
 
     def ppn_start(self,attrs):
         pass
-#       self.put_out("    <s:ppn>")
 
     def ppn_end(self):
         self.data = self.data.strip()
         if not self.data == "":
             self.ppn = self.data
-#           self.put_out(self.data)
             self.data = ""
-#        self.put_out("</s:ppn>\n")
 
     def publicaties_van_start(self,attrs):
         pass
-#        self.put_out("    <s:publicaties_van>")
 
     def publicaties_van_end(self):
         pass
-#        if not self.data.strip() == "":
-#            self.put_out(self.data.strip())
-#            self.data = ""
-#        self.put_out("</s:publicaties_van>\n")
 
     def publicaties_start(self,attrs):
         self.in_literatuur = True
@@ -734,7 +638,6 @@ class MyHTMLParser(HTMLParser):
         self.jvu = ""
         self.pages = ""
         self.ppn = ""
-#        self.put_out("    <s:publicaties rdf:parseType=\"Resource\">")
 
     def publicaties_end(self):
         self.in_literatuur = False
@@ -755,7 +658,6 @@ class MyHTMLParser(HTMLParser):
 
     def goossens_start(self,attrs):
         pass
-#        self.put_out("    <s:goossens>")
 
     def goossens_end(self):
         self.data = self.data.strip()
@@ -765,23 +667,26 @@ class MyHTMLParser(HTMLParser):
 
     def opmerkingen_start(self,attrs):
         pass
-#        self.put_out("    <s:opmerkingen rdf:parseType=\"Literal\">")
 
     def opmerkingen_end(self):
         self.data = self.data.strip()
         if not self.data == "":
-            self.put_out("    <s:opmerkingen rdf:parseType=\"Literal\">{0}</s:opmerkingen>\n".format(self.data))
+            tekst = re.sub(r" *</p> *<p> *","</p>\n<p>",self.data).strip()
+
+            self.put_out("    <s:opmerkingen rdf:parseType=\"Literal\">{0}</s:opmerkingen>\n".format(tekst))
             self.data = ""
 
     def aantekeningen_start(self,attrs):
-        self.put_out("    <s:aantekeningen rdf:parseType=\"Literal\">")
+        pass
 
     def aantekeningen_end(self):
         self.data = self.data.strip()
-        if not self.data.strip() == "":
-            self.put_out(self.data.strip())
+        if not self.data == "":
+            md = re.search(r'(.*)<([^<>]*<)(.*)',self.data)
+            if md:
+                self.data = "{0}&lt;{1}{2}".format(md.group(1),md.group(2),md.group(3))
+            self.put_out("    <s:aantekeningen rdf:parseType=\"Literal\">{0}</s:aantekeningen>\n".format(self.data))
             self.data = ""
-        self.put_out("</s:aantekeningen>\n")
 
     def titel_start(self,attrs):
         self.put_out("    <s:titel>")
@@ -794,58 +699,43 @@ class MyHTMLParser(HTMLParser):
         self.put_out("</s:titel>\n")
 
     def annotatie_start(self,attrs):
-        self.put_out("    <s:annotatie>")
+        pass
 
     def annotatie_end(self):
-        if not self.data.strip() == "":
-            self.put_out(self.data.strip())
-            self.data = ""
-        self.put_out("  </s:annotatie>\n")
+        pass
 
     def anno_start(self,attrs):
-        self.put_out("\n  <s:anno rdf:parseType=\"Resource\">")
+        self.ankernaam = ""
+        self.anno_tekst = ""
 
     def anno_end(self):
-        self.data = self.data.strip()
-        if not self.data.strip() == "":
-            self.put_out(self.data.strip())
-            self.data = ""
-        self.put_out("</s:anno>")
+        code = "{0}_{1}".format(self.code, self.ankernaam)
+        annotatie = {}
+        annotatie['ankernaam'] = self.ankernaam
+        annotatie['anno_tekst'] = self.anno_tekst
+        self.annotaties[code] = annotatie
+        self.put_out("    <s:anno rdf:resource=\"https://resource.huygens.knaw.nl/sport/annotatie/{}\"/>\n".format(code))
 
     def ankernaam_start(self,attrs):
-        self.put_out("    <s:ankernaam>")
+        pass
 
     def ankernaam_end(self):
         self.data = self.data.strip()
-        if not self.data.strip() == "":
-            self.put_out(self.data.strip())
+        if not self.data == "":
+            self.ankernaam = self.data
             self.data = ""
-        self.put_out("</s:ankernaam>\n")
 
     def annotatie_tekst_start(self,attrs):
-        self.put_out("    <s:annotatie_tekst rdf:parseType=\"Literal\">")
+        pass
 
     def annotatie_tekst_end(self):
         self.data = self.data.strip()
-        if not self.data.strip() == "":
-            self.put_out(self.data.strip())
+        if not self.data == "":
+            self.anno_tekst = self.data
             self.data = ""
-        self.put_out("</s:annotatie_tekst>\n")
-
-
-    def tag_string(self, tag, literal=False):
-        text = self.clean_text(self.current_data)
-        self.current_data = ""
-        if text=="":
-            return
-        lit_str = ''
-        if literal:
-            lit_str = ' rdf:parseType="Literal"'
-        self.put_out("    <{0}:{1}{3}>{2}</{0}:{1}>\n".format(self.afk, tag, text, lit_str))
 
 
     def handle_starttag(self, tag, attrs):
-        self.current_tag = tag
         r = self.locals
         if self.level == 1:
             self.code = (os.path.basename(self.filename)[:-4]).lower()
@@ -854,10 +744,6 @@ class MyHTMLParser(HTMLParser):
   <{0}:{1} rdf:about="https://resource.huygens.knaw.nl/{0}/{1}/{2}">
 '''
             self.put_out(lines.format(collection, tag, self.code))
-        elif tag in self.tags_without_resource:
-            pass
-        elif tag in self.tags_with_resource:
-            pass
         else:
             try:
                 res = r[tag+"_start"]
@@ -867,13 +753,6 @@ class MyHTMLParser(HTMLParser):
                     self.tags.append(tag)
         self.inc_level()
  
-#print("Oops!  No start function for {}. Try\
-                    #again...".format(tag))
-            #print("<{}{}>".format(tag,self.add_attrs(attrs)))
-          #  print("Start tag:", tag+"_start")
-          #  for attr in attrs:
-        #      print("     attr:", attr)
-
 
     def handle_endtag(self, tag):
         code = os.path.basename(self.filename)[:-4]
@@ -882,10 +761,6 @@ class MyHTMLParser(HTMLParser):
             self.in_verbaal = False
             self.in_besluit = False
             self.in_mailrapport = True
-        elif tag in self.tags_without_resource:
-            self.tag_string(tag)
-        elif tag in self.tags_with_resource:
-            self.tag_string(tag, True)
         else:
             try:
                 self.locals[tag+"_end"](self)
@@ -907,8 +782,7 @@ class MyHTMLParser(HTMLParser):
             self.dag = data.strip()
             data = ""
         if not data == "":
-            self.data = self.data + " " + data
-#   
+            self.data = self.data + " " + self.clean_text(data.replace("<br>","<br/>"))
 
     def handle_comment(self, data):
         pass
@@ -936,19 +810,12 @@ class MyHTMLParser(HTMLParser):
         for a in attrs:
             res[a[0]] = a[1]
         return res
-#        sys.stderr.write("len(attrs): {}\n{}\n".format(len(attrs),attrs))
-#        for i in range(0,len(attrs),2):
-#            res[attrs[i]] = attrs[i+1]
-#            sys.stderr.write("i: {}\n".format(i))
-#        return res
 
 
 
     def make_id_from_words(self,text):
         if self.pattern.search(text):
             text_id = self.pattern.sub("_",text.lower()).strip('_')
-            # strip('_') pas uitvoeren als probleem upper lower etc is
-            # opgelost
             return text_id
         else:
             return text
@@ -959,21 +826,10 @@ class MyHTMLParser(HTMLParser):
             ent_s = "{}{}".format(ent.group(1),ent.group(2))
             if ent_s not in self.entiteiten:
                 self.entiteiten.append(ent_s)
-#        text = re.sub(r"</p> *<p>","\n",text.strip())
         text = re.sub(r"</p> *<p>","</p>\n<p>",text.strip())
-#        if text[0:3]=="<p>":
-#            text = text[3:]
-#        if text[-4:]=="</p>":
-#            text = text[0:-4]
-#        text = text.strip()
-#        if text[-3:]=="<p>":
-#            text = text[0:-3].strip()
-
         # Ja, ja... Dit moet echt drie keer gebeuren voordat alles is
         # omgezet naar utf8!
         text = html.unescape(html.unescape(html.unescape(text)))
-#        text = text.replace("<","&lt;")
-#        text = text.replace(">","&gt;")
         text = text.replace("&","&amp;")
         return text.strip()
 
@@ -984,13 +840,6 @@ class MyHTMLParser(HTMLParser):
         if self.level > 1:
             self.level -= 1
         
-    def make_indent(self, num=0):
-        if num==0:
-            res = "  " * self.level
-        else:
-            res = "  " * num
-        return res
-
     def put_out(self, arg):
         self.output.write(arg)
 
@@ -1001,32 +850,23 @@ class MyHTMLParser(HTMLParser):
 
         if not len(self.maand) == 0:
             try:
-                maand = "-{:0>2d}".format(int(self.maand)) #sprintf("-%02d",@dag.to_i)
+                maand = "-{:0>2d}".format(int(self.maand))
             except ValueError:
                 stderr("maand: {}".format(self.maand))
-#            maand = "-{:0>2d}".format(int(maand)) #sprintf("-%02d",@maand.to_i)
         if not len(self.dag) == 0:
             try:
-                dag = "-{:0>2d}".format(int(self.dag)) #sprintf("-%02d",@dag.to_i)
+                dag = "-{:0>2d}".format(int(self.dag))
             except ValueError:
                 stderr(dag)
         return '{}{}{}'.format(self.jaar,maand,dag)
-
-    def verwerk_datum(self):
-        result = '<{1}:date rdf:datatype="http://www.w3.org/2001/XMLSchema#date">{2}</{1}:date>'
-        return result.format(self.make_indent(),self.afk,self.get_datum())
 
     def voeg_volgnr_toe(self, code, verzameling):
         while code in verzameling:
             md = re.match(r"(.*)_(\d+)$", code)
             if not md==None:
-#                 stderr("iets gevonden")
-#                 stderr("{0}".format(md.group(1)))
-#                 stderr("{0}".format(md.group(2)))
                  code = "{0}_{1}".format(md.group(1), (int(md.group(2)) + 1))
             else:
                 code = code + "_1"
-#            stderr("code (v): {0}".format(code))
         return code
 
 def help_message():
@@ -1062,41 +902,34 @@ if __name__ == "__main__":
     stderr("start")
     stderr(datetime.today().strftime("%H:%M:%S"))
 
-
     args = arguments()
-#    inputfile = args['inputfile']
     directory = args['directory']
     outputfile = args['outputfile']
     collection = args['collection']
-#    resource = args['resource']
     if not directory or not outputfile or not collection:
         help_message()
 
     afk = collection[0:1]
     output = open(outputfile,"w", encoding='utf-8')
-    # evt. aanpassen:
+
     rdf_rdf ='''<?xml version="1.0"?>
 <rdf:RDF
     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     xmlns:{collection}="https://resource.huygens.knaw.nl/{collection}"
-    xmlns:s="https://resource.huygens.knaw.nl/{collection}"
+    xmlns:{afk}="https://resource.huygens.knaw.nl/{collection}"
     xmlns:schema="http://schema.org/">
 '''
     output.write(rdf_rdf.format(afk=afk,collection=collection))
 
     all_files = glob.glob("{}/**/*.xml".format(directory),recursive=True)
-    # verwijder alles met adviesKIZ uit all_files
-
 
     parser = MyHTMLParser(output,collection,afk)
 
     for filename in all_files:
-        if not "adviesKIZ" in filename:
-#            stderr(filename)
-            invoer = open(filename, encoding='utf-8')
-            parser.filename = filename
-            for line in invoer:
-                parser.feed(line)
+        invoer = open(filename, encoding='utf-8')
+        parser.filename = filename
+        for line in invoer:
+            parser.feed(line)
 
     output.write("\n")
     for key in sorted(parser.alt_namen):
@@ -1252,7 +1085,6 @@ if __name__ == "__main__":
 
     output.write("\n")
     for code in sorted(parser.gemeenten):
-#        gemeente = parser.gemeenten[code]
         lines = \
 '''  <sport:gemeente rdf:about="https://resource.huygens.knaw.nl/sport/gemeente/{0}">
     <sport:id>{0}</sport:id>
@@ -1274,17 +1106,37 @@ if __name__ == "__main__":
     output.write("\n")
     for code in sorted(parser.relaties):
         relatie = parser.relaties[code]
-#        stderr("relatie: {}".format(relatie))
         relatie_met = '/'.join(relatie['relaties_met'])
         instelling = relatie['instelling']
+        md =  re.search(r'<p>(.*)</p>',instelling)
+        if md:
+            title = md.group(1)
+            title = re.sub(" *</p>.*<p> *"," / ",title)
+        else:
+            title = instelling
         lines = \
-'''  <sport:relatie rdf:about="https://resource.huygens.knaw.nl/sport/provincie/{0}">
+'''  <sport:relatie rdf:about="https://resource.huygens.knaw.nl/sport/relatie/{0}">
     <sport:id>{0}</sport:id>
     <schema:title>{1}</schema:title>
-    <schema:relatie_met>{2}</schema:relatie_met>
-    <schema:instelling>{1}</schema:instelling>
+    <sport:relatie_met>{2}</sport:relatie_met>
+    <sport:instelling rdf:parseType="Literal">{3}</sport:instelling>
   </sport:relatie>
-'''.format(code, instelling, relatie_met)
+'''.format(code, title, relatie_met, instelling)
+        output.write(lines)
+
+    output.write("\n")
+    for code in sorted(parser.annotaties):
+        annotatie = parser.annotaties[code]
+        ankernaam = annotatie['ankernaam']
+        tekst = annotatie['anno_tekst']
+        lines = \
+'''  <sport:annotatie rdf:about="https://resource.huygens.knaw.nl/sport/annotatie/{0}">
+    <sport:id>{0}</sport:id>
+    <schema:title>{2}</schema:title>
+    <sport:ankernaam>{2}</sport:ankernaam>
+    <sport:annotatie_tekst rdf:parseType="Literal">{1}</sport:annotatie_tekst>
+  </sport:annotatie>
+'''.format(code, tekst, ankernaam)
         output.write(lines)
 
     output.write("\n</rdf:RDF>\n")
@@ -1293,10 +1145,8 @@ if __name__ == "__main__":
     for t in parser.tags:
         stderr("{}".format(t))
 
-#    stderr("html entiteiten ({}):".format(len(parser.entiteiten)))
-#    for t in parser.entiteiten:
-#        stderr("{} - {}".format(t,html.unescape(t)))
-
     stderr(datetime.today().strftime("%H:%M:%S"))
     stderr("einde")
+
+#  at some place a <schema:title> should be added
 
