@@ -7,7 +7,7 @@ from document import Document
 from keywords import Keyword
 import unittest
 
-class TestStringMethods(unittest.TestCase):
+class TestPersonClass(unittest.TestCase):
 
     def test_person(self):
         person = Person(prefix="ww", object_name="wwperson", url="https://resource.huygens.knaw.nl/ww/wwperson/43375aa3-1ed3-4a65-89ec-520794705415")
@@ -25,6 +25,12 @@ class TestStringMethods(unittest.TestCase):
         person.add("surnamePrefix","de")
         person.add("givenName","Teun")
         self.assertEqual(person.items,{})
+
+class TestlanguageClass(unittest.TestCase):
+
+    def test_language(self):
+        language = Language(prefix="ww",language="Dutch")
+        self.assertEqual(str(language),"Dutch")
 
 
 if __name__ == '__main__':
