@@ -4,16 +4,16 @@
 class Location:
     prefix = ""
     url = ""
+    object_name = ""
     location = ""
     longitude = ""
     latitude = ""
 
-    def __init__(self, prefix, url="", location=""):
+    def __init__(self, prefix, object_name="location", url="", location=""):
         self.prefix = prefix
-        if url:
-            self.url = url
-        if location:
-            self.location = location
+        self.object_name = object_name
+        self.url = url
+        self.location = location
 
     def set_latitude(self, lat):
         self.latitude = lat
@@ -34,7 +34,7 @@ class Location:
 
     def rdfxml(self):
         result = ""
-        result += '<{0}:location rdf:about="{1}">\n'.format(self.prefix,
+        result += '<{0}:{1} rdf:about="{2}">\n'.format(self.prefix, self.object_name,
                 self.url)
         if self.location:
             result += " <{0}:displayName>{1}</{0}:displayName>\n".format(self.prefix,
@@ -46,6 +46,6 @@ class Location:
             result += "  <{0}:longitude>{1}</{0}:longitude>\n".format(self.prefix,
                     self.longitude)
         result += "  <schema:title>{0}</schema:title>\n".format(self)
-        result += '</{0}:location>\n'.format(self.prefix)
+        result += '</{0}:{1}>\n'.format(self.prefix, self.object_name)
         return result
 
