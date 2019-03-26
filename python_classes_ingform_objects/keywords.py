@@ -1,22 +1,23 @@
 # -*- coding: utf-8 -*-
+import sys
 
-
-class Language:
+class Keyword:
     prefix = ""
     object_name = ""
     url = ""
-    language = ""
+    title = ""
+    # various items, part of a keyword
     items = {}
 
-    def __init__(self, prefix, object_name="language", url="", language=""):
+    def __init__(self, prefix, object_name="keyword", url="", title=""):
         self.prefix = prefix
         self.object_name = object_name
         self.url = url
-        self.language = language
+        self.title = title
         self.items = {}
 
     def __str__(self):
-        return self.language
+        return self.title
 
     def add_item(self, item, value):
         if item in self.items:
@@ -26,13 +27,11 @@ class Language:
 
     def rdfxml(self):
         result = ""
-        result += '<{0}:{1} rdf:about="{2}">\n'.format(self.prefix, self.object_name,
-                self.url)
-        if self.language:
-            result += "  <{0}:displayName>{1}</{0}:displayName>\n".format(self.prefix,
-                        self.language)
-            result += "  <schema:title>{1}</schema:title>\n".format(self.prefix,
-                        self.language)
+        result += '<{0}:{1} rdf:about="{2}">\n'.format(self.prefix,
+                self.object_name, self.url)
+        if self.title:
+            result += "  <{0}:displayName>{1}</{0}:displayName>\n".format(self.prefix, self.title)
+        result += "  <schema:title>{0}</schema:title>\n".format(self.title)
         for key in self.items:
             result += "  <{0}:{1}>{2}</{0}:{1}>\n".format(self.prefix,
                     key, self.items[key])

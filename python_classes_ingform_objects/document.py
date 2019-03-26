@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from person import Person
 from collective import Collective
+from keywords import Keyword
 import sys
 
 class Document:
@@ -20,6 +21,10 @@ class Document:
         self.object_name = object_name
         self.url = url
         self.title = title
+        self.authors = []
+        self.publishers = []
+        self.keywords = []
+        self.items = {}
 
     def __str__(self):
         return self.title
@@ -38,11 +43,20 @@ Person\n".format(author.__class__))
             sys.stderr.write("Can't add object {} as publisher; should be \
 Collective\n".format(publisher.__class__))
 
+    def add_keyword(self, keyword):
+        if type(keyword) is Keyword:
+            self.keywords.append(keyword)
+        else:
+            sys.stderr.write("Can't add object {} as keyword; should be \
+Keyword\n".format(keyword.__class__))
+
     def add_item(self, item, value):
         if item=="author":
             self.add_author(value)
         elif item=="publisher":
             self.add_publisher(value)
+        elif item=="keyword":
+            self.add_keyword(value)
         elif item in self.items:
             self.items[item] += " " + value
         else:
@@ -61,12 +75,18 @@ Collective\n".format(publisher.__class__))
         for publisher in self.publishers:
             result += '  <{0}:publisher rdf:resource="{1}"/>\n'.format(self.prefix, 
                     publisher.url)
-        for item in self.items:
-            print(item)
+        for keyword in self.keywords:
+            result += '  <{0}:keyword rdf:resource="{1}"/>\n'.format(self.prefix, 
+                    keyword.url)
+        for key in self.items:
+            result += "  <{0}:{1}>{2}</{0}:{1}>\n".format(self.prefix,
+                    key, self.items[key])
         result += '</{0}:{1}>\n'.format(self.prefix, self.object_name)
         for author in self.authors:
             result += author.rdfxml()
         for publisher in self.publishers:
             result += publisher.rdfxml()
+        for keyword in self.keywords:
+            result += keyword.rdfxml()
         return result
 

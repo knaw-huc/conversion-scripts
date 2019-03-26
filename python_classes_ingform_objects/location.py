@@ -8,18 +8,26 @@ class Location:
     location = ""
     longitude = ""
     latitude = ""
+    items = {}
 
     def __init__(self, prefix, object_name="location", url="", location=""):
         self.prefix = prefix
         self.object_name = object_name
         self.url = url
         self.location = location
+        self.items = {}
 
     def set_latitude(self, lat):
         self.latitude = lat
 
     def set_longitude(self, long):
         self.longitude = long
+
+    def add_item(self, item, value):
+        if item in self.items:
+            self.items[item] += " " + value
+        else:
+            self.items[item] = value
 
     def __str__(self):
         return self.location
@@ -46,6 +54,9 @@ class Location:
             result += "  <{0}:longitude>{1}</{0}:longitude>\n".format(self.prefix,
                     self.longitude)
         result += "  <schema:title>{0}</schema:title>\n".format(self)
+        for key in self.items:
+            result += "  <{0}:{1}>{2}</{0}:{1}>\n".format(self.prefix,
+                    key, self.items[key])
         result += '</{0}:{1}>\n'.format(self.prefix, self.object_name)
         return result
 
